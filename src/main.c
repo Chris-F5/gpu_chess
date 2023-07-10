@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
 #include "chess.h"
 
 int
@@ -39,17 +40,22 @@ main(int argc, char **argv)
   const char *fen;
   struct board board;
   uint64_t attack_set;
+  Move moves[256];
+  int i, move_count;
+
+  assert(sizeof(unsigned long) == 8);
   fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
   if (parse_fen(&board, fen))
     return 1;
   printf("blockers:\n");
   print_bitmap(board.all_white | board.all_black);
 
-  init_magic_bitboards();
-  attack_set = get_bishop_attack_set(34, board.all_white | board.all_black);
-
-  printf("attacks:\n");
-  print_bitmap(attack_set & ~board.all_white);
+  move_count = generate_moves(&board, moves) - moves;
+  for (i = 0; i < move_count; i++) { 
+    printf("MOVE %d\n", i);
+    print_move(moves[i]);
+  }
+  printf("move count: %d\n", move_count);
 
   return 0;
 }
