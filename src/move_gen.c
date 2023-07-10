@@ -5,39 +5,49 @@
 #include "bit_utils.h"
 #include "chess.h"
 
+#define SHIFT(v, s) ((s) < 0 ? (v) >> -(s) : (v) << (s))
+
 static Move *
-generate_white_pawn_moves(const struct board *board, Move *moves)
+generate_pawn_moves(const struct board *board, Move *moves, const int white)
 {
   uint64_t move_1, move_2;
   int origin, dest;
+  /* TODO: check the compiler optomises this function into 2 variations. */
+  const uint64_t skip_rank        = white ? 0x0000000000ff0000 : 0x0000ff0000000000;
+  const uint64_t no_promote_ranks = white ? 0x0000ffffffffffff : 0xffffffffffff0000;
+  const uint64_t my_pawns         = white ? board->pawns_white : board->pawns_black;
+  const uint64_t their_all        = white ? board->all_black : board->all_white;
+  const int      forward          = white ? 8 : -8;
   /* regular move 1/2 */
-  move_1 = (board->pawns_white & 0x0000ffffffffffff) << 8;
+  move_1 = SHIFT(my_pawns & no_promote_ranks, forward);
   move_1 &= ~(board->all_white | board->all_black);
-  move_2 = (move_1 & 0x0000000000ff0000) << 8;
+  move_2 = SHIFT(move_1 & skip_rank, forward);
   move_2 &= ~(board->all_white | board->all_black);
   while (move_1) {
     dest = pop_lss(&move_1);
-    origin = dest - 8;
+    origin = dest - forward;
     *moves++ = dest | (origin << 6);
   }
   while (move_2) {
     dest = pop_lss(&move_2);
-    origin = dest - 16;
+    origin = dest - forward * 2;
     *moves++ = dest | (origin << 6);
   }
   /* regular capture left/right */
-  move_1 = (board->pawns_white & 0x0000ffffffffffff) << 7;
-  move_1 &= board->all_black;
+  move_1 = SHIFT(my_pawns & no_promote_ranks, forward + 1);
+  move_1 &= 0xfefefefefefefefe;
+  move_1 &= their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
-    origin = dest - 7;
+    origin = dest - (forward + 1);
     *moves++ = dest | (origin << 6);
   }
-  move_1 = (board->pawns_white & 0x0000ffffffffffff) << 9;
-  move_1 &= board->all_black;
+  move_1 = SHIFT(my_pawns & no_promote_ranks, forward - 1);
+  move_1 &= 0x7f7f7f7f7f7f7f7f;
+  move_1 &= their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
-    origin = dest - 9;
+    origin = dest - (forward - 1);
     *moves++ = dest | (origin << 6);
   }
   return moves;
@@ -46,6 +56,7 @@ generate_white_pawn_moves(const struct board *board, Move *moves)
 Move *
 generate_moves(const struct board *board, Move *moves)
 {
-  moves = generate_white_pawn_moves(board, moves);
+  moves = generate_pawn_moves(board, moves,
+      board->flags & BOARD_FLAG_WHITE_TO_PLAY);
   return moves;
 }
