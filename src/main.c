@@ -44,7 +44,7 @@ main(int argc, char **argv)
   int i, move_count;
 
   assert(sizeof(unsigned long) == 8);
-  fen = "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2";
+  fen = "1nbqkbnr/ppppppPp/5P2/8/3P4/1r6/PPP1P2P/RNBQKBNR w KQk - 0 1";
   if (parse_fen(&board, fen))
     return 1;
   printf("blockers:\n");
