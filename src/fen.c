@@ -6,91 +6,94 @@
 int
 parse_fen(struct board *board, const char *fen)
 {
-  int i;
+  int r, f;
   unsigned char c;
 
   memset(board, 0, sizeof(struct board));
-  i = 63;
-  while (i >= 0) {
+  r = 7;
+  f = 0;
+  while (!(r == 0 && f == 8)) {
     c = *fen++;
     switch (c) {
     case 'p':
-      board->pawns_black |= (uint64_t)1 << i;
-      i--;
+      board->pawns_black |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'n':
-      board->knights_black |= (uint64_t)1 << i;
-      i--;
+      board->knights_black |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'b':
-      board->bishops_black |= (uint64_t)1 << i;
-      i--;
+      board->bishops_black |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'r':
-      board->rooks_black |= (uint64_t)1 << i;
-      i--;
+      board->rooks_black |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'q':
-      board->queens_black |= (uint64_t)1 << i;
-      i--;
+      board->queens_black |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'k':
-      board->kings_black |= (uint64_t)1 << i;
-      i--;
+      board->kings_black |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'P':
-      board->pawns_white |= (uint64_t)1 << i;
-      i--;
+      board->pawns_white |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'N':
-      board->knights_white |= (uint64_t)1 << i;
-      i--;
+      board->knights_white |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'B':
-      board->bishops_white |= (uint64_t)1 << i;
-      i--;
+      board->bishops_white |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'R':
-      board->rooks_white |= (uint64_t)1 << i;
-      i--;
+      board->rooks_white |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'Q':
-      board->queens_white |= (uint64_t)1 << i;
-      i--;
+      board->queens_white |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case 'K':
-      board->kings_white |= (uint64_t)1 << i;
-      i--;
+      board->kings_white |= (uint64_t)1 << (r * 8 + f);
+      f++;
       break;
     case '/':
-      if (i % 8 != 7) {
+      if (f != 8) {
         fprintf(stderr, "failed to parse fen: unexpected slash\n");
         return 1;
       }
+      f = 0;
+      r--;
       break;
     case '1':
-      i -= 1;
+      f += 1;
       break;
     case '2':
-      i -= 2;
+      f += 2;
       break;
     case '3':
-      i -= 3;
+      f += 3;
       break;
     case '4':
-      i -= 4;
+      f += 4;
       break;
     case '5':
-      i -= 5;
+      f += 5;
       break;
     case '6':
-      i -= 6;
+      f += 6;
       break;
     case '7':
-      i -= 7;
+      f += 7;
       break;
     case '8':
-      i -= 8;
+      f += 8;
       break;
     default:
       fprintf(stderr, "failed to parse fen: unexpected piece character '%c'\n", c);
