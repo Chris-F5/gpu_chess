@@ -38,11 +38,6 @@ void *xmalloc(size_t len);
 void *xrealloc(void *p, size_t len);
 void print_bitmap(uint64_t bitmap);
 
-/* bitutils.c */
-int count_bits(uint64_t n);
-uint64_t least_significant_bit(uint64_t n);;
-uint64_t random_uint64(void);
-
 /* magic_bitboards.c */
 void print_best_magics(void);
 void init_magic_bitboards(void);

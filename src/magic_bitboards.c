@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "chess.h"
 #include "magic_numbers.h"
+#include "bit_utils.h"
 
 uint64_t rook_relevance_masks[64];
 uint64_t bishop_relevance_masks[64];
@@ -119,19 +120,17 @@ primitive_rook_attack_squares(int square, uint64_t blockers)
 static uint64_t
 generate_mock_blockers(uint64_t mask, int index)
 {
-  uint64_t blockers, lsb;
-  unsigned char bit;
+  uint64_t blockers, bit;
   blockers = 0;
   while (index) {
     if (mask == 0) {
       fprintf(stderr, "failed to generate blockers: index too high\n");
       exit(1);
     }
-    lsb = least_significant_bit(mask);
-    mask = mask ^ lsb;
+    bit = pop_lsb(&mask);
     if (index & 1)
-      blockers |= lsb;
-    index = index >> 1;
+      blockers |= bit;
+    index >>= 1;
   }
   return blockers;
 }
