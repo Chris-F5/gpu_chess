@@ -1,21 +1,20 @@
+OUTPUTNAME=output
 CC=gcc
 CFLAGS=-g
 LDFLAGS=
-SRC=main.c fen.c
-OBJ=${SRC:.c=.o}
+SRC=$(shell find src -type f -name "*.c")
+OBJ=$(patsubst src/%.c, obj/%.o, $(SRC))
 
-.PHONY: clean run
+.PHONY: run clean
 
-output: ${OBJ}
-	${CC} ${OBJ} -o $@ ${LDFLAGS}
+$(OUTPUTNAME): $(OBJ)
+	$(CC) $(OBJ) -o $@ $(LDFLAGS)
 
-.c.o:
-	${CC} -c $<
+obj/%.o: src/%.c src/chess.h
+	mkdir -p $(dir $@)
+	$(CC) -c $(CFLAGS) $< -o $@
 
-${OBJ}: chess.h
-
-run: output
-	./output
-
+run: $(OUTPUTNAME)
+	./$(OUTPUTNAME)
 clean:
-	rm -rf ${OBJ} output
+	rm -fr obj $(OUTPUTNAME)
