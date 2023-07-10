@@ -45,6 +45,6 @@ print_bitmap(uint64_t bitmap)
 void
 print_move(Move move)
 {
-  printf("src: %s\n", square_names[(move >> 5) & 0x1f]);
-  printf("dst: %s\n", square_names[move & 0x1f]);
+  printf("src: %s\n", square_names[(move >> 6) & 0x3f]);
+  printf("dst: %s\n", square_names[move & 0x3f]);
 }

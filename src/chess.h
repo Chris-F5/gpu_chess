@@ -36,7 +36,6 @@ struct board {
  */
 typedef uint16_t Move;
 
-
 /* fen.c */
 int parse_fen(struct board *board, const char *fen);
 void write_fen(const struct board *board, char *buf);
