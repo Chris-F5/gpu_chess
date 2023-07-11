@@ -97,6 +97,7 @@ debug_move_gen(void)
     }
     printf("YOU MAKE THE MOVE:\n");
     print_move(move);
+    make_move(&board, move);
   }
 }
 

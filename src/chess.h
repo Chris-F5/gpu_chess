@@ -76,3 +76,6 @@ uint64_t get_bishop_attack_set(int bishop_square, uint64_t blockers);
 
 /* move_gen.c */
 Move *generate_moves(const struct board *board, Move *moves);
+
+/* make_move.c */
+void make_move(struct board *board, Move move);
