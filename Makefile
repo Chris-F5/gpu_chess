@@ -1,6 +1,6 @@
 OUTPUTNAME=output
 CC=gcc
-CFLAGS=-g
+CFLAGS=-g -Wall
 LDFLAGS=
 SRC=$(shell find src -type f -name "*.c")
 HEADERS=$(shell find src -type f -name "*.h")

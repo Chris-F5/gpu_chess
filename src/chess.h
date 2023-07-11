@@ -65,6 +65,8 @@ void *xmalloc(size_t len);
 void *xrealloc(void *p, size_t len);
 void print_bitmap(uint64_t bitmap);
 void print_move(Move move);
+void print_board(const struct board *board);
+void read_buffer(char *buffer, int len);
 
 /* magic_bitboards.c */
 void print_best_magics(void);

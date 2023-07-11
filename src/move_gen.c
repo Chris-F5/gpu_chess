@@ -34,15 +34,13 @@ generate_pawn_moves(const struct board *board, Move *moves, const int white)
     *moves++ = dest | (origin << 6);
   }
   /* regular capture left/right */
-  move_1 = SHIFT(my_pawns & no_promote_ranks, forward + 1) & 0xfefefefefefefefe
-    & their_all;
+  move_1 = SHIFT(my_pawns & no_promote_ranks, forward + 1) & 0xfefefefefefefefe & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward + 1);
     *moves++ = dest | (origin << 6);
   }
-  move_1 = SHIFT(my_pawns & no_promote_ranks, forward - 1) & 0x7f7f7f7f7f7f7f7f
-    & their_all;
+  move_1 = SHIFT(my_pawns & no_promote_ranks, forward - 1) & 0x7f7f7f7f7f7f7f7f & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward - 1);
@@ -58,8 +56,7 @@ generate_pawn_moves(const struct board *board, Move *moves, const int white)
     *moves++ = dest | (origin << 6) | (PIECE_TYPE_ROOK << 12) | (SPECIAL_MOVE_PROMOTE << 14);
     *moves++ = dest | (origin << 6) | (PIECE_TYPE_QUEEN << 12) | (SPECIAL_MOVE_PROMOTE << 14);
   }
-  move_1 = SHIFT(my_pawns & promote_rank, forward + 1) & 0xfefefefefefefefe
-    & their_all;
+  move_1 = SHIFT(my_pawns & promote_rank, forward + 1) & 0xfefefefefefefefe & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward + 1);
@@ -68,8 +65,7 @@ generate_pawn_moves(const struct board *board, Move *moves, const int white)
     *moves++ = dest | (origin << 6) | (PIECE_TYPE_ROOK << 12) | (SPECIAL_MOVE_PROMOTE << 14);
     *moves++ = dest | (origin << 6) | (PIECE_TYPE_QUEEN << 12) | (SPECIAL_MOVE_PROMOTE << 14);
   }
-  move_1 = SHIFT(my_pawns & promote_rank, forward - 1) & 0x7f7f7f7f7f7f7f7f
-    & their_all;
+  move_1 = SHIFT(my_pawns & promote_rank, forward - 1) & 0x7f7f7f7f7f7f7f7f & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward - 1);
