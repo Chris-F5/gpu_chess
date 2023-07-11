@@ -29,10 +29,29 @@ struct board {
   uint32_t fullmove_clock;
 };
 
+enum piece_type {
+  /* promote pieces occupy 2 bits */
+  PIECE_TYPE_KNIGHT = 0,
+  PIECE_TYPE_BISHOP = 1,
+  PIECE_TYPE_ROOK = 2,
+  PIECE_TYPE_QUEEN = 3,
+  /* other pieces */
+  PIECE_TYPE_PAWN = 4,
+  PIECE_TYPE_KING = 5,
+};
+
+enum special_move {
+  SPECIAL_MOVE_NONE = 0,
+  SPECIAL_MOVE_PROMOTE = 1,
+  SPECIAL_MOVE_EN_PASSANT = 2,
+  SPECIAL_MOVE_CASTLING = 3,
+};
 
 /*
- * 0-5  destination square
- * 6-11 origin square
+ * 0-5   destination square
+ * 6-11  origin square
+ * 12-13 promote piece type
+ * 14-15 special move
  */
 typedef uint16_t Move;
 
