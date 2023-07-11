@@ -7,72 +7,76 @@
 
 #define SHIFT(v, s) ((s) < 0 ? (v) >> -(s) : (v) << (s))
 
+static Move *generate_pawn_moves(const struct board *board, Move *moves,
+    const int color);
+
 static Move *
-generate_pawn_moves(const struct board *board, Move *moves, const int white)
+generate_pawn_moves(const struct board *board, Move *moves, const int color)
 {
-  uint64_t move_1, move_2;
+  Bitboard move_1, move_2;
   int origin, dest;
   /* TODO: check the compiler optomises this function into 2 variations. */
-  const uint64_t skip_rank        = white ? 0x0000000000ff0000 : 0x0000ff0000000000;
-  const uint64_t no_promote_ranks = white ? 0x0000ffffffffffff : 0xffffffffffff0000;
-  const uint64_t promote_rank     = white ? 0x00ff000000000000 : 0x000000000000ff00;
-  const uint64_t my_pawns         = white ? board->pawns_white : board->pawns_black;
-  const uint64_t their_all        = white ? board->all_black : board->all_white;
-  const int      forward          = white ? 8 : -8;
-  const uint64_t empty = ~(board->all_white | board->all_black);
+  const Bitboard skip_rank        = color ? 0x0000000000ff0000 : 0x0000ff0000000000;
+  const Bitboard no_promote_ranks = color ? 0x0000ffffffffffff : 0xffffffffffff0000;
+  const Bitboard promote_rank     = color ? 0x00ff000000000000 : 0x000000000000ff00;
+  const Bitboard my_pawns         = board->type_bitboards[PIECE_TYPE_PAWN]
+    & board->color_bitboards[color];
+  const Bitboard their_all        = board->color_bitboards[!color];
+  const int      forward          = color ? 8 : -8;
+  const Bitboard empty = ~(board->color_bitboards[0] | board->color_bitboards[1]);
   /* regular move 1/2 */
   move_1 = SHIFT(my_pawns & no_promote_ranks, forward) & empty;
   move_2 = SHIFT(move_1 & skip_rank, forward) & empty;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - forward;
-    *moves++ = dest | (origin << 6);
+    *moves++ = basic_move(origin, dest);
   }
   while (move_2) {
     dest = pop_lss(&move_2);
     origin = dest - forward * 2;
-    *moves++ = dest | (origin << 6);
+    *moves++ = basic_move(origin, dest);
   }
   /* regular capture left/right */
   move_1 = SHIFT(my_pawns & no_promote_ranks, forward + 1) & 0xfefefefefefefefe & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward + 1);
-    *moves++ = dest | (origin << 6);
+    *moves++ = basic_move(origin, dest);
   }
   move_1 = SHIFT(my_pawns & no_promote_ranks, forward - 1) & 0x7f7f7f7f7f7f7f7f & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward - 1);
-    *moves++ = dest | (origin << 6);
+    *moves++ = basic_move(origin, dest);
   }
   /* promotion */
   move_1 = SHIFT(my_pawns & promote_rank, forward) & empty;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - forward;
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_KNIGHT << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_BISHOP << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_ROOK << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_QUEEN << 12) | (SPECIAL_MOVE_PROMOTE << 14);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_KNIGHT);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_BISHOP);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_ROOK);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_QUEEN);
   }
   move_1 = SHIFT(my_pawns & promote_rank, forward + 1) & 0xfefefefefefefefe & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward + 1);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_KNIGHT << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_BISHOP << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_ROOK << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_QUEEN << 12) | (SPECIAL_MOVE_PROMOTE << 14);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_KNIGHT);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_BISHOP);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_ROOK);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_QUEEN);
   }
   move_1 = SHIFT(my_pawns & promote_rank, forward - 1) & 0x7f7f7f7f7f7f7f7f & their_all;
   while (move_1) {
     dest = pop_lss(&move_1);
     origin = dest - (forward - 1);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_KNIGHT << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_BISHOP << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_ROOK << 12) | (SPECIAL_MOVE_PROMOTE << 14);
-    *moves++ = dest | (origin << 6) | (PIECE_TYPE_QUEEN << 12) | (SPECIAL_MOVE_PROMOTE << 14);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_KNIGHT);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_BISHOP);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_ROOK);
+    *moves++ = promote_move(origin, dest, PIECE_TYPE_QUEEN);
   }
   return moves;
 }

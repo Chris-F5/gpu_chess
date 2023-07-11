@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 #include "chess.h"
 #include "bit_utils.h"
 
@@ -15,6 +16,14 @@ const char *square_names[] = {
   "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
   "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
   "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+};
+const char piece_chars[] = {
+  [PIECE_TYPE_PAWN]   = 'p',
+  [PIECE_TYPE_KNIGHT] = 'n',
+  [PIECE_TYPE_BISHOP] = 'b',
+  [PIECE_TYPE_ROOK]   = 'r',
+  [PIECE_TYPE_QUEEN]  = 'q',
+  [PIECE_TYPE_KING]   = 'k',
 };
 
 void *
@@ -55,27 +64,17 @@ print_move(Move move)
 void
 print_board(const struct board *board)
 {
-  char char_map[64];
-  uint64_t map;
+  char piece_char;
   int r, f;
-  memset(char_map, ' ', 64);
-  map = board->pawns_white;
-  for (map = board->pawns_white  ; map; char_map[pop_lss(&map)] = 'p');
-  for (map = board->knights_white; map; char_map[pop_lss(&map)] = 'n');
-  for (map = board->bishops_white; map; char_map[pop_lss(&map)] = 'b');
-  for (map = board->rooks_white  ; map; char_map[pop_lss(&map)] = 'r');
-  for (map = board->queens_white ; map; char_map[pop_lss(&map)] = 'q');
-  for (map = board->kings_white  ; map; char_map[pop_lss(&map)] = 'k');
-  for (map = board->pawns_black  ; map; char_map[pop_lss(&map)] = 'P');
-  for (map = board->knights_black; map; char_map[pop_lss(&map)] = 'N');
-  for (map = board->bishops_black; map; char_map[pop_lss(&map)] = 'B');
-  for (map = board->rooks_black  ; map; char_map[pop_lss(&map)] = 'R');
-  for (map = board->queens_black ; map; char_map[pop_lss(&map)] = 'Q');
-  for (map = board->kings_black  ; map; char_map[pop_lss(&map)] = 'K');
   for (r = 7; r >= 0; r--) {
     printf("+---+---+---+---+---+---+---+---+\n");
     for (f = 0; f < 8; f++) {
-      printf("| %c ", char_map[r * 8 + f]);
+      piece_char = piece_chars[get_piece_type(board->mailbox, r * 8 + f)];
+      if (board->color_bitboards[COLOR_WHITE] & ((uint64_t)1 << (r * 8 + f)))
+        piece_char = toupper(piece_char);
+      else if (!(board->color_bitboards[COLOR_BLACK] & ((uint64_t)1 << (r * 8 + f))))
+        piece_char = ' ';
+      printf("| %c ", piece_char);
     }
     printf("| %d\n", r + 1);
   }

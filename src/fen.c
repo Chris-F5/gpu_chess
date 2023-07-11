@@ -1,7 +1,11 @@
+#include <stdint.h>
+#include <stddef.h>
+#include <assert.h>
+#include <stdlib.h>
+#include "chess.h"
+
 #include <stdio.h>
 #include <string.h>
-#include <stdint.h>
-#include "chess.h"
 
 int
 parse_fen(struct board *board, const char *fen)
@@ -16,51 +20,75 @@ parse_fen(struct board *board, const char *fen)
     c = *fen++;
     switch (c) {
     case 'p':
-      board->pawns_black |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_PAWN] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_BLACK] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_PAWN);
       f++;
       break;
     case 'n':
-      board->knights_black |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_KNIGHT] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_BLACK] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_KNIGHT);
       f++;
       break;
     case 'b':
-      board->bishops_black |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_BISHOP] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_BLACK] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_BISHOP);
       f++;
       break;
     case 'r':
-      board->rooks_black |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_ROOK] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_BLACK] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_ROOK);
       f++;
       break;
     case 'q':
-      board->queens_black |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_QUEEN] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_BLACK] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_QUEEN);
       f++;
       break;
     case 'k':
-      board->kings_black |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_KING] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_BLACK] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_KING);
       f++;
       break;
     case 'P':
-      board->pawns_white |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_PAWN] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_WHITE] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_PAWN);
       f++;
       break;
     case 'N':
-      board->knights_white |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_KNIGHT] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_WHITE] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_KNIGHT);
       f++;
       break;
     case 'B':
-      board->bishops_white |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_BISHOP] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_WHITE] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_BISHOP);
       f++;
       break;
     case 'R':
-      board->rooks_white |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_ROOK] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_WHITE] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_ROOK);
       f++;
       break;
     case 'Q':
-      board->queens_white |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_QUEEN] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_WHITE] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_QUEEN);
       f++;
       break;
     case 'K':
-      board->kings_white |= (uint64_t)1 << (r * 8 + f);
+      board->type_bitboards[PIECE_TYPE_KING] |= (uint64_t)1 << (r * 8 + f);
+      board->color_bitboards[COLOR_WHITE] |= (uint64_t)1 << (r * 8 + f);
+      set_piece_type(board->mailbox, r * 8 + f, PIECE_TYPE_KING);
       f++;
       break;
     case '/':
@@ -176,15 +204,10 @@ parse_fen(struct board *board, const char *fen)
       return 1;
     }
   }
-  board->all_white = board->pawns_white | board->knights_white
-    | board->bishops_white | board->rooks_white | board->queens_white
-    | board->kings_white;
-  board->all_black = board->pawns_black | board->knights_black
-    | board->bishops_black | board->rooks_black | board->queens_black
-    | board->kings_black;
   return 0;
 }
 
+/*
 void
 write_fen(const struct board *board, char *buf)
 {
@@ -256,3 +279,4 @@ write_fen(const struct board *board, char *buf)
   *buf++ = ' ';
   sprintf(buf, "%u %u", board->halfmove_clock, board->fullmove_clock);
 }
+*/
