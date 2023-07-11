@@ -122,6 +122,11 @@ pop_lss(Bitboard *b)
   *b &= *b - 1;
   return square;
 }
+static inline Bitboard
+set_bit(int square)
+{
+  return (uint64_t)1 << square;
+}
 static inline int
 get_piece_type(const uint8_t *mailbox, int square)
 {
@@ -163,20 +168,20 @@ promote_move(int origin, int destination, int promote_piece_type)
 static inline int
 get_move_origin(Move move)
 {
-  return (move << 6) & 0x3f;
+  return (move >> 6) & 0x3f;
 }
 static inline int
-get_move_destination(Move move)
+get_move_dest(Move move)
 {
   return move & 0x3f;
 }
 static inline int
 get_move_special_type(Move move)
 {
-  return (move << 12) & 0x02;
+  return (move >> 12) & 0x02;
 }
 static inline int
 get_move_promote_piece(Move move)
 {
-  return (move << 14) & 0x02;
+  return (move >> 14) & 0x02;
 }

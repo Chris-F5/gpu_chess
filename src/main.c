@@ -65,14 +65,14 @@ debug_move_gen(void)
       continue;
     printf("Can move to:\n");
     for (i = 0; i < move_count; i++)
-      if (((moves[i] >> 6) & 0x3f) == origin)
-        printf("%s\n", square_names[moves[i] & 0x3f]);
+      if (get_move_origin(moves[i]) == origin)
+        printf("%s\n", square_names[get_move_dest(moves[i])]);
     printf("Enter destination square:\n");
     if ( (dest = read_square()) < 0 )
       continue;
     move = 0;
     for (i = 0; i < move_count; i++) {
-      if (((moves[i] >> 6) & 0x3f) == origin && (moves[i] & 0x3f) == dest) {
+      if (get_move_origin(moves[i]) == origin && get_move_dest(moves[i]) == dest) {
         move = moves[i];
         break;
       }
@@ -81,19 +81,19 @@ debug_move_gen(void)
       printf("Move not legal.\n");
       continue;
     }
-    if ((move >> 14) == SPECIAL_MOVE_PROMOTE) {
+    if (get_move_special_type(move) == SPECIAL_MOVE_PROMOTE) {
       printf("Enter promote piece.\n");
       if ( (promote = read_promote_piece()) < 0)
         continue;
       move = 0;
       for (i = 0; i < move_count; i++) {
-        if (((moves[i] >> 6) & 0x3f) == origin && (moves[i] & 0x3f) == dest
-            && (moves[i] >> 12) == promote) {
+        if (get_move_origin(moves[i]) == origin && get_move_dest(moves[i]) == dest
+            && get_move_promote_piece(moves[i]) == promote) {
           move = moves[i];
           break;
         }
       }
-      assert((move >> 14) == SPECIAL_MOVE_PROMOTE);
+      assert(get_move_special_type(move) == SPECIAL_MOVE_PROMOTE);
     }
     printf("YOU MAKE THE MOVE:\n");
     print_move(move);
