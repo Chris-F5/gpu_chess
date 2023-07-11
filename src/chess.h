@@ -160,8 +160,8 @@ promote_move(int origin, int destination, int promote_piece_type)
 {
   assert((destination >= 0 && destination < 8)
       || (destination >= 56 && destination < 64));
-  assert((origin >= 8 && origin < 16) || (origin >= 48 && destination < 56));
-  assert((promote_piece_type & 0x02) == promote_piece_type);
+  assert((origin >= 8 && origin < 16) || (origin >= 48 && origin < 56));
+  assert((promote_piece_type & 0x03) == promote_piece_type);
   return destination | (origin << 6) | (SPECIAL_MOVE_PROMOTE << 12)
     | (promote_piece_type << 14);
 }
@@ -178,10 +178,10 @@ get_move_dest(Move move)
 static inline int
 get_move_special_type(Move move)
 {
-  return (move >> 12) & 0x02;
+  return (move >> 12) & 0x03;
 }
 static inline int
 get_move_promote_piece(Move move)
 {
-  return (move >> 14) & 0x02;
+  return (move >> 14) & 0x03;
 }

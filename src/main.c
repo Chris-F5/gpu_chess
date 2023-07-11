@@ -36,7 +36,7 @@ read_promote_piece(void)
     return -1;
   }
   switch (input[0]) {
-  case 'k': return PIECE_TYPE_KNIGHT;
+  case 'n': return PIECE_TYPE_KNIGHT;
   case 'b': return PIECE_TYPE_BISHOP;
   case 'r': return PIECE_TYPE_ROOK;
   case 'q': return PIECE_TYPE_QUEEN;
