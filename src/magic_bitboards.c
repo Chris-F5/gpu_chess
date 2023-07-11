@@ -149,7 +149,7 @@ init_magic_square(int square, int rook, uint64_t magic, int bits,
   table_size = 0;
   for (i = 0; i < ((uint64_t)1 << relevant_square_count); i++) {
     blockers = generate_mock_blockers(relevance_mask, i);
-    hash = (blockers * magic) >> 64 - bits;
+    hash = (blockers * magic) >> (64 - bits);
     attacks = rook
       ? primitive_rook_attack_squares(square, blockers)
       : primitive_bishop_attack_squares(square, blockers);
@@ -203,7 +203,7 @@ print_best_magic(int square, int rook, int reduction_attempts,
 void
 print_best_magics(void)
 {
-  int square, rook, table_offset;
+  int square, table_offset;
   init_relevance_masks();
   srand(time(NULL));
   printf("\
@@ -226,7 +226,7 @@ uint64_t attack_table[%d];\n", table_offset);
 void
 init_magic_bitboards(void)
 {
-  int i, j;
+  int i;
   init_relevance_masks();
   memset(attack_table, 0, sizeof(attack_table));
   for (i = 0; i < 128; i++)
