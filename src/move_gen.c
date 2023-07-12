@@ -7,15 +7,16 @@
 
 #define SHIFT(v, s) ((s) < 0 ? (v) >> -(s) : (v) << (s))
 
-static Move *generate_pawn_moves(const struct board *board, Move *moves,
-    const int color);
+static Move *generate_pawn_moves(const struct board *board, Move *moves);
+static Move *generate_knight_moves(const struct board *board, Move *moves);
 
 static Move *
-generate_pawn_moves(const struct board *board, Move *moves, const int color)
+generate_pawn_moves(const struct board *board, Move *moves)
 {
   Bitboard move_1, move_2;
   int origin, dest;
   /* TODO: check the compiler optomises this function into 2 variations. */
+  const int color = board->flags & BOARD_FLAG_WHITE_TO_PLAY ? 1 : 0;
   const Bitboard skip_rank        = color ? 0x0000000000ff0000 : 0x0000ff0000000000;
   const Bitboard no_promote_ranks = color ? 0x0000ffffffffffff : 0xffffffffffff0000;
   const Bitboard promote_rank     = color ? 0x00ff000000000000 : 0x000000000000ff00;
@@ -92,10 +93,28 @@ generate_pawn_moves(const struct board *board, Move *moves, const int color)
   return moves;
 }
 
+static Move *
+generate_knight_moves(const struct board *board, Move *moves)
+{
+  uint64_t knights, attacks;
+  int origin, dest;
+  const int color = board->flags & BOARD_FLAG_WHITE_TO_PLAY ? 1 : 0;
+  knights = board->type_bitboards[PIECE_TYPE_KNIGHT] & board->color_bitboards[color];
+  while (knights) {
+    origin = pop_lss(&knights);
+    attacks = knight_attack_table[origin] & ~board->color_bitboards[color];
+    while (attacks) {
+      dest = pop_lss(&attacks);
+      *moves++ = basic_move(origin, dest);
+    }
+  }
+  return moves;
+}
+
 Move *
 generate_moves(const struct board *board, Move *moves)
 {
-  moves = generate_pawn_moves(board, moves,
-      board->flags & BOARD_FLAG_WHITE_TO_PLAY);
+  moves = generate_pawn_moves(board, moves);
+  moves = generate_knight_moves(board, moves);
   return moves;
 }

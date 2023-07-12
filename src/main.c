@@ -156,7 +156,7 @@ main(int argc, char **argv)
   printf("move count: %d\n", move_count);
   */
 
-  init_magic_bitboards();
+  init_bitboards();
   debug_move_gen();
 
   return 0;

@@ -62,7 +62,7 @@ void write_fen(const struct board *board, char *buf);
 */
 
 /* utils.c */
-extern const char *square_names[];
+extern const char *square_names[64];
 extern const char piece_chars[];
 void *xmalloc(size_t len);
 void *xrealloc(void *p, size_t len);
@@ -71,9 +71,11 @@ void print_move(Move move);
 void print_board(const struct board *board);
 void read_buffer(char *buffer, int len);
 
-/* magic_bitboards.c */
+/* bitboards.c */
+extern uint64_t knight_attack_table[64];
+extern uint64_t king_attack_table[64];
 void print_best_magics(void);
-void init_magic_bitboards(void);
+void init_bitboards(void);
 uint64_t get_rook_attack_set(int rook_square, uint64_t blockers);
 uint64_t get_bishop_attack_set(int bishop_square, uint64_t blockers);
 
@@ -122,6 +124,11 @@ pop_lss(Bitboard *b)
   *b &= *b - 1;
   return square;
 }
+static inline int
+check_square(int square)
+{
+  return square >= 0 && square < 64;
+}
 static inline Bitboard
 set_bit(int square)
 {
@@ -149,28 +156,27 @@ set_piece_type(uint8_t *mailbox, int square, int piece_type)
 }
 
 static inline Move
-basic_move(int origin, int destination)
+basic_move(int origin, int dest)
 {
-  assert(destination >= 0 && destination < 64);
+  assert(dest >= 0 && dest < 64);
   assert(origin >= 0 && origin < 64);
-  return destination | (origin << 6);
+  return dest | (origin << 6);
 }
 static inline Move
-promote_move(int origin, int destination, int promote_piece_type)
+promote_move(int origin, int dest, int promote_piece_type)
 {
-  assert((destination >= 0 && destination < 8)
-      || (destination >= 56 && destination < 64));
+  assert((dest >= 0 && dest < 8) || (dest >= 56 && dest < 64));
   assert((origin >= 8 && origin < 16) || (origin >= 48 && origin < 56));
   assert((promote_piece_type & 0x03) == promote_piece_type);
-  return destination | (origin << 6) | (SPECIAL_MOVE_PROMOTE << 12)
+  return dest | (origin << 6) | (SPECIAL_MOVE_PROMOTE << 12)
     | (promote_piece_type << 14);
 }
 static inline Move
-en_passant_move(int origin, int destination)
+en_passant_move(int origin, int dest)
 {
-  assert(destination >= 0 && destination < 64);
+  assert(dest >= 0 && dest < 64);
   assert(origin >= 0 && origin < 64);
-  return destination | (origin << 6) | (SPECIAL_MOVE_EN_PASSANT << 12);
+  return dest | (origin << 6) | (SPECIAL_MOVE_EN_PASSANT << 12);
 }
 static inline int
 get_move_origin(Move move)

@@ -8,8 +8,11 @@
 #include "magic_numbers.h"
 #include "bit_utils.h"
 
-uint64_t rook_relevance_masks[64];
-uint64_t bishop_relevance_masks[64];
+static uint64_t rook_relevance_masks[64];
+static uint64_t bishop_relevance_masks[64];
+
+uint64_t knight_attack_table[64];
+uint64_t king_attack_table[64];
 
 static void
 init_relevance_masks(void)
@@ -48,6 +51,32 @@ init_relevance_masks(void)
     if (i % 8 < 6)
       for (j = i - 7; j > 7 && j % 8 != 7; j -= 7)
         bishop_relevance_masks[i] |= (uint64_t)1 << j;
+  }
+}
+
+static void
+init_knight_attack_table(void)
+{
+  int i, j;
+  const int moves[] = {-17, -15, -10, -6, 6, 10, 15, 17};
+  for (i = 0; i < 64; i++) {
+    knight_attack_table[i] = 0;
+    for (j = 0; j < sizeof(moves) / sizeof(moves[0]); j++)
+      if (abs(i % 8 - (i + moves[j]) % 8) <= 2 && check_square(i + moves[j]))
+        knight_attack_table[i] |= set_bit(i + moves[j]);
+  }
+}
+
+static void
+init_king_attack_table(void)
+{
+  int i, j;
+  const int moves[] = {-9, -8, -7, -1, 1, 7, 8, 9};
+  for (i = 0; i < 64; i++) {
+    king_attack_table[i] = 0;
+    for (j = 0; j < sizeof(moves) / sizeof(moves[0]); j++)
+      if (abs(i % 8 - (i + moves[j]) % 8) <= 1 && check_square(i + moves[j]))
+        king_attack_table[i] |= set_bit(i + moves[j]);
   }
 }
 
@@ -224,7 +253,7 @@ uint64_t attack_table[%d];\n", table_offset);
 }
 
 void
-init_magic_bitboards(void)
+init_bitboards(void)
 {
   int i;
   init_relevance_masks();
@@ -233,6 +262,8 @@ init_magic_bitboards(void)
     assert(init_magic_square(i % 64, i > 63, magic_squares[i].magic,
         magic_squares[i].bits,
         attack_table + magic_squares[i].attack_table_offset));
+  init_knight_attack_table();
+  init_king_attack_table();
 }
 
 uint64_t
