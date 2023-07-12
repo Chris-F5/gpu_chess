@@ -111,10 +111,52 @@ generate_knight_moves(const struct board *board, Move *moves)
   return moves;
 }
 
+static Move *
+generate_bishop_moves(const struct board *board, Move *moves)
+{
+  uint64_t bishops, attacks;
+  int origin, dest;
+  const int color = board->flags & BOARD_FLAG_WHITE_TO_PLAY ? 1 : 0;
+  bishops = board->type_bitboards[PIECE_TYPE_BISHOP] & board->color_bitboards[color];
+  while (bishops) {
+    origin = pop_lss(&bishops);
+    attacks
+      = get_bishop_attack_set(origin, board->color_bitboards[0] | board->color_bitboards[1])
+      & ~board->color_bitboards[color];
+    while (attacks) {
+      dest = pop_lss(&attacks);
+      *moves++ = basic_move(origin, dest);
+    }
+  }
+  return moves;
+}
+
+static Move *
+generate_rook_moves(const struct board *board, Move *moves)
+{
+  uint64_t rooks, attacks;
+  int origin, dest;
+  const int color = board->flags & BOARD_FLAG_WHITE_TO_PLAY ? 1 : 0;
+  rooks = board->type_bitboards[PIECE_TYPE_ROOK] & board->color_bitboards[color];
+  while (rooks) {
+    origin = pop_lss(&rooks);
+    attacks
+      = get_rook_attack_set(origin, board->color_bitboards[0] | board->color_bitboards[1])
+      & ~board->color_bitboards[color];
+    while (attacks) {
+      dest = pop_lss(&attacks);
+      *moves++ = basic_move(origin, dest);
+    }
+  }
+  return moves;
+}
+
 Move *
 generate_moves(const struct board *board, Move *moves)
 {
   moves = generate_pawn_moves(board, moves);
   moves = generate_knight_moves(board, moves);
+  moves = generate_bishop_moves(board, moves);
+  moves = generate_rook_moves(board, moves);
   return moves;
 }
