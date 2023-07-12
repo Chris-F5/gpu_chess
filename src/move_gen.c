@@ -151,6 +151,27 @@ generate_rook_moves(const struct board *board, Move *moves)
   return moves;
 }
 
+static Move *
+generate_queen_moves(const struct board *board, Move *moves)
+{
+  uint64_t queens, attacks;
+  int origin, dest;
+  const int color = board->flags & BOARD_FLAG_WHITE_TO_PLAY ? 1 : 0;
+  queens = board->type_bitboards[PIECE_TYPE_QUEEN] & board->color_bitboards[color];
+  while (queens) {
+    origin = pop_lss(&queens);
+    attacks
+      = (get_rook_attack_set(origin, board->color_bitboards[0] | board->color_bitboards[1])
+      | get_bishop_attack_set(origin, board->color_bitboards[0] | board->color_bitboards[1]))
+      & ~board->color_bitboards[color];
+    while (attacks) {
+      dest = pop_lss(&attacks);
+      *moves++ = basic_move(origin, dest);
+    }
+  }
+  return moves;
+}
+
 Move *
 generate_moves(const struct board *board, Move *moves)
 {
@@ -158,5 +179,6 @@ generate_moves(const struct board *board, Move *moves)
   moves = generate_knight_moves(board, moves);
   moves = generate_bishop_moves(board, moves);
   moves = generate_rook_moves(board, moves);
+  moves = generate_queen_moves(board, moves);
   return moves;
 }
