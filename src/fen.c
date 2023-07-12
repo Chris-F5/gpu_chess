@@ -171,14 +171,15 @@ parse_fen(struct board *board, const char *fen)
     }
   }
   c = *fen++;
-  board->en_passant_file = 9;
+  board->en_passant_square = -1;
   if (c >= 'a' && c <= 'h') {
-    board->en_passant_file = c - 'a';
+    board->en_passant_square = c - 'a';
     c = *fen++;
     if (c != '3' && c != '6') {
       fprintf(stderr, "failed to parse fen: unexpected en passant character '%c'\n", c);
       return 1;
     }
+    board->en_passant_square += (c - '1') * 8;
   } else if (c != '-') {
     fprintf(stderr, "failed to parse fen: unexpected en passant character '%c'\n", c);
     return 1;

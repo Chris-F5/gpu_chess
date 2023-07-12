@@ -50,6 +50,17 @@ generate_pawn_moves(const struct board *board, Move *moves, const int color)
     origin = dest - (forward - 1);
     *moves++ = basic_move(origin, dest);
   }
+  /* en passant */
+  if (board->en_passant_square >= 0) {
+    dest = board->en_passant_square;
+    move_1
+      = ((SHIFT(set_bit(dest), -forward + 1) & 0xfefefefefefefefe)
+      | (SHIFT(set_bit(dest), -forward - 1) & 0x7f7f7f7f7f7f7f7f)) & my_pawns;
+    while (move_1) {
+      origin = pop_lss(&move_1);
+      *moves++ = en_passant_move(origin, dest);
+    }
+  }
   /* promotion */
   move_1 = SHIFT(my_pawns & promote_rank, forward) & empty;
   while (move_1) {

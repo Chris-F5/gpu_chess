@@ -35,7 +35,7 @@ struct board {
   uint8_t mailbox[32]; /* 4-bits per piece */
 
   BoardFlags flags;
-  uint16_t en_passant_file;
+  int16_t en_passant_square;
   uint16_t halfmove_clock;
   uint16_t fullmove_clock;
 };
@@ -164,6 +164,13 @@ promote_move(int origin, int destination, int promote_piece_type)
   assert((promote_piece_type & 0x03) == promote_piece_type);
   return destination | (origin << 6) | (SPECIAL_MOVE_PROMOTE << 12)
     | (promote_piece_type << 14);
+}
+static inline Move
+en_passant_move(int origin, int destination)
+{
+  assert(destination >= 0 && destination < 64);
+  assert(origin >= 0 && origin < 64);
+  return destination | (origin << 6) | (SPECIAL_MOVE_EN_PASSANT << 12);
 }
 static inline int
 get_move_origin(Move move)
